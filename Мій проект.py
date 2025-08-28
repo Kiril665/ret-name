@@ -1,47 +1,91 @@
-import customtkinter as ctk
-from tkinter import messagebox
-import os
+import tkinter as tk
+import math
 
-# Отримати шлях до Робочого столу
-desktop_path = os.path.join(os.path.expanduser("~"), "Desktop", "users.txt")
+# Функція для зміни кольору фону
+def change_bg(color):
+    root.config(bg=color)
+    entry.config(bg=color)
+    frame.config(bg=color)
+    # змінюємо фон для всіх кнопок
+    for child in frame.winfo_children():
+        child.config(bg=color)
+        for btn in child.winfo_children():
+            btn.config(bg=color)
+
+def calculator():
+    try:
+        result = eval(entry.get())
+        entry.delete(0, tk.END)
+        entry.insert(tk.END, str(result))
+    except Exception:
+        entry.delete(0, tk.END)
+        entry.insert(tk.END, "Error")
+
+def insert_numbers(value):
+    entry.insert(tk.END, value)
+
+def clear_entry():
+    entry.delete(0, tk.END)
+
+def percent():
+    try:
+        value = eval(entry.get())
+        result = value / 100
+        entry.delete(0, tk.END)
+        entry.insert(tk.END, str(result))
+    except Exception:
+        entry.delete(0, tk.END)
+        entry.insert(tk.END, "Error")
 
 
-# Функція для збереження даних
-def save_data():
-    username = entry_username.get()
-    password = entry_password.get()
-
-    if username and password:
-        with open(desktop_path, "a") as file:
-            file.write(f"Username: {username}, Password: {password}\n")
-        messagebox.showinfo("Успіх", f"Дані збережено на Робочому столі!")
-        entry_username.delete(0, ctk.END)
-        entry_password.delete(0, ctk.END)
-    else:
-        messagebox.showwarning("Помилка", "Заповніть всі поля!")
+root = tk.Tk()
+root.title("Калькулятор")
+root.geometry("300x400")
 
 
-# --- Вікно ---
-window = ctk.CTk()
-ctk.set_appearance_mode("Dark")
-ctk.set_default_color_theme("blue")
+entry = tk.Entry(root, font=("Arial", 20), bd=10, relief=tk.RIDGE, justify="right")
+entry.pack(fill="x", padx=10, pady=10)
 
-window.geometry("400x350")
-window.title("Сторінка логіна")
 
-# --- Заголовок ---
-label = ctk.CTkLabel(window, text="Введіть ваші дані", font=("Bakery", 20))
-label.pack(pady=25)
+frame = tk.Frame(root)
+frame.pack()
 
-# --- Поля вводу ---
-entry_username = ctk.CTkEntry(window, placeholder_text="Username", width=250)
-entry_username.pack(pady=10)
 
-entry_password = ctk.CTkEntry(window, placeholder_text="Password", show="*", width=250)
-entry_password.pack(pady=10)
+buttons = [
+    ["7", "8", "9", "/"],
+    ["4", "5", "6", "*"],
+    ["1", "2", "3", "-"],
+    ["0", "%", "C", "+"],
+    ["="]
+]
 
-# --- Кнопка увійти ---
-login_button = ctk.CTkButton(window, text="Увійти", width=100, command=save_data)
-login_button.pack(pady=25)
+for row in buttons:
+    row_frame = tk.Frame(frame)
+    row_frame.pack(side="top", expand=True, fill="both")
+    for btn in row:
+        if btn == "=":
+            button = tk.Button(row_frame, text=btn, font=("Arial", 18), width=5, height=2,
+                               command=calculator)
+        elif btn == "C":
+            button = tk.Button(row_frame, text=btn, font=("Arial", 18), width=5, height=2,
+                               command=clear_entry)
+        elif btn == "%":
+            button = tk.Button(row_frame, text=btn, font=("Arial", 18), width=5, height=2,
+                               command=percent)
+        else:
+            button = tk.Button(row_frame, text=btn, font=("Arial", 18), width=5, height=2,
+                               command=lambda b=btn: insert_numbers(b))
+        button.pack(side="left", expand=True, fill="both")
 
-window.mainloop()
+
+menubar = tk.Menu(root)
+color_menu = tk.Menu(menubar, tearoff=0)
+colors = ["white", "lightgrey", "yellow", "lightblue", "pink", "green"]
+
+for color in colors:
+    color_menu.add_command(label=color, command=lambda c=color: change_bg(c))
+
+menubar.add_cascade(label="Фон", menu=color_menu)
+root.config(menu=menubar)
+
+root.mainloop()
