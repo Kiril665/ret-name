@@ -1,91 +1,89 @@
 import tkinter as tk
-import math
 
-# Функція для зміни кольору фону
-def change_bg(color):
-    root.config(bg=color)
-    entry.config(bg=color)
-    frame.config(bg=color)
-    # змінюємо фон для всіх кнопок
-    for child in frame.winfo_children():
-        child.config(bg=color)
-        for btn in child.winfo_children():
-            btn.config(bg=color)
+# ----------------- Словник рецептів -----------------
+recipes = {
+    "Омлет": {
+        "інгредієнти": ["Яйця - 2 шт.", "Молоко - 50 мл", "Сіль, перець - за смаком"],
+        "кроки": ["Збийте яйця з молоком та сіллю.",
+                  "Розігрійте сковорідку з маслом.",
+                  "Вилийте суміш на сковорідку та готуйте 5 хвилин.",
+                  "Подайте гарячим."]
+    },
+    "Яєчня": {
+        "інгредієнти": ["Яйця - 2 шт.", "Масло - 10 г", "Сіль, перець - за смаком"],
+        "кроки": ["Розігрійте сковорідку з маслом.",
+                  "Вбийте яйця на сковорідку.",
+                  "Смажте до готовності.",
+                  "Подайте гарячим."]
+    },
+    "Суп з кальмаром": {
+        "інгредієнти": ["Кальмари - 300 г", "Картопля - 2 шт.", "Морква - 1 шт.", "Цибуля - 1 шт.", "Сіль, перець - за смаком"],
+        "кроки": [
+            "Дідусь Макс каже: «Це кальмар, а не інопланетянин, не лякайся!»",
+            "Відваріть кальмари 5 хв.",
+            "Додайте овочі і варіть ще 15 хв.",
+            "Макс жартує: «Якщо звариш довше 5 хвилин, кальмар стане супергероєм»",
+            "Посоліть, поперчіть та подайте."
+        ]
+    },
+    "Борщ": {
+        "інгредієнти": ["Буряк - 2 шт.", "Капуста - 200 г", "Картопля - 2 шт.", "Морква - 1 шт.", "Цибуля - 1 шт.",
+                        "Томатна паста - 2 ст.л.", "М’ясо - 300 г", "Сіль, перець - за смаком"],
+        "кроки": ["Відваріть м’ясо до готовності і дістаньте його.",
+                  "Додайте картоплю та моркву у бульйон.",
+                  "Додайте буряк та томатну пасту, варіть 10 хв.",
+                  "Додайте капусту і варіть ще 10 хв.",
+                  "Покладіть м’ясо назад, приправте сіллю та перцем.",
+                  "Подайте гарячим зі сметаною."]
+    }
+    # Ти можеш додати сюди інші страви до 50+
+}
 
-def calculator():
-    try:
-        result = eval(entry.get())
-        entry.delete(0, tk.END)
-        entry.insert(tk.END, str(result))
-    except Exception:
-        entry.delete(0, tk.END)
-        entry.insert(tk.END, "Error")
+# ----------------- Функції -----------------
+def on_entry_click(event):
+    if entry.get() == "Введіть назву страви":
+        entry.delete(0, "end")
+        entry.config(fg="black")
+        entry.place(y=entry.winfo_y() + 10)
 
-def insert_numbers(value):
-    entry.insert(tk.END, value)
+def on_focusout(event):
+    if entry.get() == "":
+        entry.insert(0, "Введіть назву страви")
+        entry.config(fg="grey")
+        entry.place(y=entry.winfo_y() - 10)
 
-def clear_entry():
-    entry.delete(0, tk.END)
+def show_recipe():
+    # Перша літера великою
+    dish = entry.get().capitalize()
+    text_output.delete("1.0", tk.END)
+    if dish in recipes:
+        text_output.insert(tk.END, "Інгредієнти:\n")
+        for ing in recipes[dish]["інгредієнти"]:
+            text_output.insert(tk.END, f"- {ing}\n")
+        text_output.insert(tk.END, "\nКроки приготування:\n")
+        for i, step in enumerate(recipes[dish]["кроки"], 1):
+            text_output.insert(tk.END, f"{i}. {step}\n")
+    else:
+        text_output.insert(tk.END, "Рецепт не знайдено.")
 
-def percent():
-    try:
-        value = eval(entry.get())
-        result = value / 100
-        entry.delete(0, tk.END)
-        entry.insert(tk.END, str(result))
-    except Exception:
-        entry.delete(0, tk.END)
-        entry.insert(tk.END, "Error")
-
-
+# ----------------- GUI -----------------
 root = tk.Tk()
-root.title("Калькулятор")
-root.geometry("300x400")
+root.title("Рецепти для мами Юлії")
+root.geometry("500x400")
 
+label = tk.Label(root, text="Введіть назву страви")
+label.place(x=50, y=50)
 
-entry = tk.Entry(root, font=("Arial", 20), bd=10, relief=tk.RIDGE, justify="right")
-entry.pack(fill="x", padx=10, pady=10)
+entry = tk.Entry(root, fg="grey")
+entry.insert(0, "Введіть назву страви")
+entry.place(x=50, y=50, width=300)
+entry.bind("<FocusIn>", on_entry_click)
+entry.bind("<FocusOut>", on_focusout)
 
+btn = tk.Button(root, text="Показати рецепт", command=show_recipe)
+btn.place(x=360, y=48)
 
-frame = tk.Frame(root)
-frame.pack()
-
-
-buttons = [
-    ["7", "8", "9", "/"],
-    ["4", "5", "6", "*"],
-    ["1", "2", "3", "-"],
-    ["0", "%", "C", "+"],
-    ["="]
-]
-
-for row in buttons:
-    row_frame = tk.Frame(frame)
-    row_frame.pack(side="top", expand=True, fill="both")
-    for btn in row:
-        if btn == "=":
-            button = tk.Button(row_frame, text=btn, font=("Arial", 18), width=5, height=2,
-                               command=calculator)
-        elif btn == "C":
-            button = tk.Button(row_frame, text=btn, font=("Arial", 18), width=5, height=2,
-                               command=clear_entry)
-        elif btn == "%":
-            button = tk.Button(row_frame, text=btn, font=("Arial", 18), width=5, height=2,
-                               command=percent)
-        else:
-            button = tk.Button(row_frame, text=btn, font=("Arial", 18), width=5, height=2,
-                               command=lambda b=btn: insert_numbers(b))
-        button.pack(side="left", expand=True, fill="both")
-
-
-menubar = tk.Menu(root)
-color_menu = tk.Menu(menubar, tearoff=0)
-colors = ["white", "lightgrey", "yellow", "lightblue", "pink", "green"]
-
-for color in colors:
-    color_menu.add_command(label=color, command=lambda c=color: change_bg(c))
-
-menubar.add_cascade(label="Фон", menu=color_menu)
-root.config(menu=menubar)
+text_output = tk.Text(root, wrap="word")
+text_output.place(x=50, y=100, width=400, height=280)
 
 root.mainloop()
